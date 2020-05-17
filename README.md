@@ -5,15 +5,14 @@
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### 启动微信开发
 ```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
+npm run dev:mp-weixin
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+开启微信开发者工具
+
+# 导入<kbd>dist</kbd><kbd>dev</kbd><kbd>mp-weixin</kbd>
+
+
+
