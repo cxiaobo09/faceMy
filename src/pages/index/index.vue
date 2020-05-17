@@ -1,7 +1,10 @@
 <template>
 	<view class="content">
 		<image :src='imgSrc'></image><br/>
-		
+		<view wx:if='{{textInfo.flag}}' class="textmsg">
+			<text>年龄：{{textInfo.age}}</text>
+			<text>颜值：{{textInfo.beauty}}</text>
+		</view>
 		<view class="btn">
 			<button type="default" @click="btnclick" data-typebtn="anime">动漫</button>
 			<button type="default" @click="btnclick" data-typebtn="n95">口罩</button>
@@ -15,7 +18,12 @@
 		data() {
 			return {
 				imgSrc: '../../static/back.jpg',
-				token: ''
+				token: '',
+				textInfo: {
+					flag: false,
+					age: 0 ,
+					beauty: 0
+				}
 			}
 		},
 		onLoad() {
@@ -54,6 +62,7 @@
 			},
 			// 点击按钮  功能
 			btnclick(e) {
+				this.textInfo.flag= false
 				let btntype = e.currentTarget.dataset.typebtn
 				// 判段哪个按钮
 				uni.chooseImage({
@@ -61,27 +70,41 @@
 					sizeType: ['original'],
 					success: (res) => {
 						// 调用图片转换格式函数
+						uni.showLoading({
+							title: '制作中'
+						})
 						btntype === 'test'? this.iamgeScore(res.tempFilePaths[0]) : this.imagechange(res.tempFilePaths[0], btntype)
 					}
 				})
 			},
 			iamgeScore(img) {
-				uni.request({
+				uni.uploadFile({
 					url:'https://ai.qq.com/cgi-bin/appdemo_detectface?g_tk=5381',
-					method:'POST',
-					data: {
-						image_file: img
-					},
+					filePath: img,
+					 name:"image_file", // 传给后台的键名
 					success:(res)=>{
-						console.log('图片检测结果',res)
+						let rep = JSON.parse(res.data)
+						console.log('图片检测结果',rep)
+						console.log(img)
+						if (rep.ret== 16404) {
+							uni.showToast({
+								title:"抱歉！上传的土拍你有误，请选择正确的图片！！~",
+								icon:'none'
+							})
+						}else {
+							this.textInfo.age=rep.data.face[0].age
+							this.textInfo.beauty=rep.data.face[0].beauty	
+							this.textInfo.flag= true
+							this.imgSrc = img
+						}
+						uni.hideLoading()
+						
 					}
 				})
 			},
 			// 图片转换BASE64
 			imagechange(imgsr, typebtn) {
-				uni.showLoading({
-					title: '制作中'
-				})
+				
 				console.log('imgsrc', imgsr)
 				wx.getFileSystemManager().readFile({
 					filePath: imgsr,
@@ -134,13 +157,29 @@
 		width: 100%;
 		height: 100%;
 	}
+	.textmsg {
+		position: fixed;
+		left: 50%;
+		transform: translateX(-50%);
+		bottom: 2vh;
+		text-align: center;
+		width: 50vh;
+		background-color: #fcfcfc;
+	}
+	.textmsg text {
+		color: #000000;
+		font-size: 16px;
+		font-weight: 400;
+		margin-right: 20rpx;
+		
+	}
 	.btn {
 		width: 100%;
 		display: flex;
 		flex-wrap: wrap;
 		position: fixed;
 		left: 0;
-		bottom: 5%;
+		bottom: 8%;
 		
 	}
 
